@@ -2,18 +2,28 @@ import { useEffect, useState } from 'react';
 
 import Card from '../UI/Card';
 import MealItem from './MealItem/MealItem';
-import classes from './AvailableMeals.module.css';
+import styles from './AvailableMeals.module.css';
 
 
 const AvailableMeals = () => {
 
   // useState for managing meals collection
   const [meals, setMeals] = useState([]);
+  // loading state
+  const [isLoading, setIsLoading] = useState(true);
+  // error state
+  const [httpError, setHttpError] = useState();
 
-  // FETCH DATA FROM FIREBASE DB
+  // FETCH DATA FROM FIREBASE DB, need to bypass and nest a function since we'll use async and await
   useEffect(() => {
     const fetchMeals = async () => {
       const response = await fetch('https://react-food-ordering-app-6950c-default-rtdb.europe-west1.firebasedatabase.app/meals.json');
+      
+      // check if fetching process failed
+      if(!response.ok){
+        throw new Error('Something went wrong!');
+      };
+      
       const responseData = await response.json(); // return collection as JSON
 
       const loadedMeals = [];
@@ -29,10 +39,33 @@ const AvailableMeals = () => {
       }
       // update the state
       setMeals(loadedMeals);
+      setIsLoading(false);
     };
 
-    fetchMeals();
+
+      fetchMeals().catch(error => {
+        setIsLoading(false);
+        setHttpError(error.message);
+      });
   }, []);
+
+  // pokazi loading msg dok app povlaci meals iz firebase
+  if(isLoading){
+    return(
+      <section className={styles.MealsLoading}>
+        <p>Loading</p>
+      </section>
+    )
+  }
+
+  // check if there are any errors
+  if(httpError){
+    return(
+      <section className={styles.MealsError}>
+        <p>{httpError}</p>
+      </section>
+    )
+  }
 
   const mealsList = meals.map((meal) => (
     <MealItem
@@ -45,7 +78,7 @@ const AvailableMeals = () => {
   ));
 
   return (
-    <section className={classes.meals}>
+    <section className={styles.meals}>
       <Card>
         <ul>{mealsList}</ul>
       </Card>
