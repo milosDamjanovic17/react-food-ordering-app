@@ -27,17 +27,20 @@ const Checkout = (props) => {
   const confirmHandler = (event) => {
     event.preventDefault();
 
+    // stire entered data to constant
     const enteredName = nameInputRef.current.value;
     const enteredStreet = streetInputRef.current.value;
     const enteredPostalCode = postalCodeInputRef.current.value;
     const enteredCity = cityInputRef.current.value;
 
 
+    // check validity of entered data
     const enteredNameIsValid = !isEmpty(enteredName);
     const eneteredStreetIsValid = !isEmpty(enteredStreet);
     const enteredCityIsValid = !isEmpty(enteredCity)
     const enteredPostalCodeIsValid = isFiveChars(enteredPostalCode);
 
+    // update the state
     setFormInputsValidity({
         name: enteredNameIsValid,
         street: eneteredStreetIsValid,
@@ -45,17 +48,26 @@ const Checkout = (props) => {
         city: enteredCityIsValid
     });
 
+    // check if form is valid
     const formIsValid = 
         eneteredStreetIsValid 
         && enteredNameIsValid 
         && enteredCityIsValid 
         && enteredPostalCodeIsValid;
 
+    // exit function if some fields are invalid    
     if(!formIsValid){
         console.log('POPUNI SVE');
         return;
     }    
 
+    // if everything is fine, send user data object to Cart.onConfirm
+    props.onConfirm({
+        name: enteredName,
+        street: enteredStreet,
+        postalCode: enteredPostalCode,
+        city: enteredCity
+    });
   };
 
   const nameControlClasses = 
